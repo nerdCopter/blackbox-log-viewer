@@ -1,22 +1,23 @@
 'use strict';
 
-const pkg = require('./package.json');
+import pkg from './package.json' with { type: "json" };
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const zip = require('gulp-zip');
-const del = require('del');
-const innoSetup = require('@quanle94/innosetup');
-const NwBuilder = require('nw-builder');
-const deb = require('gulp-debian');
-const buildRpm = require('rpm-builder')
-const commandExistsSync = require('command-exists').sync;
+import zip from 'gulp-zip';
+import del from 'del';
+import innoSetup from '@quanle94/innosetup';
+import nwbuild from "nw-builder";
+import deb from 'gulp-debian';
+import buildRpm from 'rpm-builder';
+//import commandExistsSync from ('command-exists').sync;
+import commandExistsSync from 'command-exists';
 
-const gulp = require('gulp');
-const yarn = require("gulp-yarn");
-const rename = require('gulp-rename');
-const os = require('os');
+import gulp from 'gulp';
+import yarn from "gulp-yarn";
+import rename from 'gulp-rename';
+import os from 'os';
 
 const DIST_DIR = './dist/';
 const APPS_DIR = './apps/';
@@ -27,10 +28,10 @@ const LINUX_INSTALL_DIR = '/opt/betaflight';
 
 var nwBuilderOptions = {
     version: '0.83.0',
-    files: './dist/**/*',
-    macIcns: './images/bf_icon.icns',
-    macPlist: { 'CFBundleDisplayName': 'Betaflight Blackbox Explorer'},
-    winIco: './images/bf_icon.ico',
+    srcDir: './dist/**/*',
+    icon: './images/bf_icon.icns',
+    //macPlist: { 'CFBundleDisplayName': 'Betaflight Blackbox Explorer'},
+    app: { icon: './images/bf_icon.ico' },
 };
 
 //-----------------
@@ -209,7 +210,7 @@ function clean_cache() {
 
 // Real work for dist task. Done in another task to call it via
 // run-sequence.
-function dist() {
+async function dist() {
     var distSources = [
         // CSS files
         './css/**/*',
@@ -328,34 +329,35 @@ function post_build(arch, folder, done) {
 }
 
 // Create debug app directories in ./debug
-function debug(done) {
+async function debug(done) {
     var platforms = getPlatforms();
 
     buildNWApps(platforms, 'sdk', DEBUG_DIR, done);
 }
 
-function buildNWApps(platforms, flavor, dir, done) {
-
+async function buildNWApps(platforms, flavor, dir, done) {
     if (platforms.length > 0) {
-        var builder = new NwBuilder(Object.assign({
-            buildDir: dir,
-            platforms: platforms,
-            flavor: flavor
+        //var builder = new NwBuilder(Object.assign({
+        await nwbuild( Object.assign({
+            outDir: dir,
+            platform: platforms,
+            flavor: flavor,
+            mode: "build",
         }, nwBuilderOptions));
         builder.on('log', console.log);
-        builder.build(function (err) {
-            if (err) {
-                console.log('Error building NW apps: ' + err);
-                clean_debug();
-                process.exit(1);
-            }
-            done();
-        });
+        //builder.build(function (err) {
+        //   if (err) {
+        //        console.log('Error building NW apps: ' + err);
+        //        clean_debug();
+        //        process.exit(1);
+        //    }
+        //    done();
+        //});
     } else {
         console.log('No platform suitable for NW Build')
         done();
     }
-}
+};
 
 
 function start_debug(done) {

@@ -247,28 +247,28 @@ function listPostBuildTasks(folder, done) {
     var postBuildTasks = [];
 
     if (platforms.indexOf('win32') != -1) {
-        postBuildTasks.push(function post_build_win32(done){ return post_build('win32', folder, done) });
+        postBuildTasks.push(async function post_build_win32(done){ return post_build('win32', folder, done) });
     }
 
     if (platforms.indexOf('win64') != -1) {
-        postBuildTasks.push(function post_build_win64(done){ return post_build('win64', folder, done) });
+        postBuildTasks.push(async function post_build_win64(done){ return post_build('win64', folder, done) });
     }
 
     if (platforms.indexOf('linux32') != -1) {
-        postBuildTasks.push(function post_build_linux32(done){ return post_build('linux32', folder, done) });
+        postBuildTasks.push(async function post_build_linux32(done){ return post_build('linux32', folder, done) });
     }
 
     if (platforms.indexOf('linux64') != -1) {
-        postBuildTasks.push(function post_build_linux64(done){ return post_build('linux64', folder, done) });
+        postBuildTasks.push(async function post_build_linux64(done){ return post_build('linux64', folder, done) });
     }
 
     if (platforms.indexOf('osx64') != -1) {
-        postBuildTasks.push(function post_build_osx64(done){ return post_build('osx64', folder, done) });
+        postBuildTasks.push(async function post_build_osx64(done){ return post_build('osx64', folder, done) });
     }
 
     // We need to return at least one task, if not gulp will throw an error
     if (postBuildTasks.length == 0) {
-        postBuildTasks.push(function post_build_none(done){ done() });
+        postBuildTasks.push(async function post_build_none(done){ done() });
     }
     return postBuildTasks;
 }
@@ -364,11 +364,12 @@ function start_debug(done) {
 
     var platforms = getPlatforms();
 
-    var exec = require('child_process').exec;    
+    //var exec = require('child_process').exec;    
+    import exec from 'child_process';
     if (platforms.length === 1) {
         var run = getRunDebugAppCommand(platforms[0]);
         console.log('Starting debug app (' + run + ')...');
-        exec(run);
+        start_debug.exec(run);
     } else {
         console.log('More than one platform specified, not starting debug app');
     }
@@ -425,7 +426,7 @@ function compressFiles(srcPath, basePath, outputFile, zipFolder) {
 
 function release_deb(arch, appDirectory, done) {
     // Check if dpkg-deb exists
-    if (!commandExistsSync('dpkg-deb')) {
+    if (!commandExistsSync.sync('dpkg-deb')) {
         console.warn('dpkg-deb command not found, not generating deb package for ' + arch);
         return done();
     }

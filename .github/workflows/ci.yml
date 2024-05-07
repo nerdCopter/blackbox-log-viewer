@@ -30,7 +30,7 @@ jobs:
 
           - name: Windows
             os: windows-2022
-            releaseArgs: --win64
+            releaseArgs: --win64 --win32
     steps:
       - uses: actions/checkout@v4
 

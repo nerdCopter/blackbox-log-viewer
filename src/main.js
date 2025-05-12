@@ -51,6 +51,36 @@ const INNER_BOUNDS_HEIGHT = 480;
 
 const INITIAL_APP_PAGE = "index.html";
 
+// --- PWA File Handler: Handle files opened via OS association ---
+if ('launchQueue' in window) {
+    console.log(`launchQueue`);
+    window.launchQueue.setConsumer(async (launchParams) => {
+    if (!launchParams.files.length) {
+      console.log(`returning`);
+      return;
+    }
+    for (const fileHandle of launchParams.files) {
+      const file = await fileHandle.getFile();
+      console.log(`opening ${file}`);
+      handleOpenedFileFromOS(file);
+    }
+  });
+} else {
+    console.log(`not launchQueue (Firefox).`);
+}
+
+// This function should use your existing file opening logic
+function handleOpenedFileFromOS(file) {
+    // If you have a function that handles File objects from the file input,
+    // call it here. For example:
+    loadFiles(file);
+
+    // As a placeholder, just log the file name:
+    console.log(`Opened file from OS: ${file.name}`);
+    // TODO: Replace with your actual file processing logic
+}
+// End -- PWA File Handler: Handle files opened via OS association ---
+
 function BlackboxLogViewer() {
   function supportsRequiredAPIs() {
     return (
